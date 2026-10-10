@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Dashboard futurista de análise de vendas da hamburgueria">
+<title>NEXUS // Inteligência de vendas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.3/papaparse.min.js"></script>
+</head>
+<body>
+<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<main class="shell">
+<header class="topbar">
+  <div class="brand"><div class="brand-symbol">N</div><div><p class="kicker">FUNDAMENTOS DE IA // ANÁLISE DE DADOS</p><h1>NEXUS <span>sales intelligence</span></h1></div></div>
+  <div class="consulting-brand">Caio Bortoleto <span>Consultoria</span></div>
+  <div class="live-pill"><i></i><span id="statusText">BASE ORIGINAL</span></div>
+</header>
+
+<section class="hero-row">
+  <div><p class="kicker cyan" id="heroKicker">PAINEL DE CONTROLE</p><h2 id="heroTitle">Veja o pulso da operação.</h2><p class="hero-text" id="heroText">Uma leitura interativa das vendas, produtos e canais da hamburgueria.</p></div>
+  <div class="hero-actions"><button class="glow-button" id="importarCsv"><img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&amp;fit=crop&amp;w=80&amp;q=80" alt=""> importar base</button><input id="arquivoCsv" type="file" accept=".csv,text/csv" hidden><button class="ghost-button" id="exportarCsv"><img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&amp;fit=crop&amp;w=80&amp;q=80" alt=""> exportar visão</button></div>
+</section>
+
+<section class="theme-panel">
+  <div class="panel-label"><span>00</span> IDENTIDADE DA EMPRESA</div>
+  <div class="theme-copy"><div><h3>Escolha o universo da sua marca</h3><p>O painel troca cores, imagens, textos e atmosfera automaticamente.</p></div><span class="theme-saved">salvo neste navegador</span></div>
+  <div class="theme-grid" role="group" aria-label="Escolher tema da empresa">
+    <button class="theme-option active" data-theme="burger" type="button"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&amp;fit=crop&amp;w=360&amp;q=80" alt="Hambúrguer artesanal"><span>Hamburgueria</span><small>retrô / neon</small></button>
+    <button class="theme-option" data-theme="bakery" type="button"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&amp;fit=crop&amp;w=360&amp;q=80" alt="Pães artesanais"><span>Padaria</span><small>retrô / artesanal</small></button>
+    <button class="theme-option" data-theme="cafe" type="button"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&amp;fit=crop&amp;w=360&amp;q=80" alt="Café servido"><span>Cafeteria</span><small>calmo / elegante</small></button>
+    <button class="theme-option" data-theme="pizzeria" type="button"><img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&amp;fit=crop&amp;w=360&amp;q=80" alt="Pizza artesanal"><span>Pizzaria</span><small>noite / calor</small></button>
+  </div>
+</section>
+
+<section class="control-panel">
+  <div class="panel-label"><span>01</span> CONTROLES DE LEITURA</div>
+  <div class="filters">
+    <label>Data inicial<input id="dataInicial" type="date"></label><label>Data final<input id="dataFinal" type="date"></label>
+    <label>Categoria<select id="categoriaFiltro"><option value="">Todas</option></select></label>
+    <label>Canal<select id="canalFiltro"><option value="">Todos</option></select></label>
+    <label>Período<select id="periodoFiltro"><option value="">Todos</option></select></label>
+    <label>Pagamento<select id="pagamentoFiltro"><option value="">Todos</option></select></label>
+    <button class="clear-button" id="limparFiltros" type="button">↺ resetar</button>
+  </div>
+  <div class="quick-row"><span>ATALHOS</span><button class="quick active" data-channel=""><img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&amp;fit=crop&amp;w=80&amp;q=80" alt="">Tudo</button><button class="quick" data-channel="Delivery"><img src="https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&amp;fit=crop&amp;w=80&amp;q=80" alt="">Delivery</button><button class="quick" data-channel="Balcão"><img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&amp;fit=crop&amp;w=80&amp;q=80" alt="">Balcão</button><span class="data-note" id="validationMessage"></span></div>
+</section>
+
+<section class="metric-grid">
+  <article class="metric primary"><span class="metric-label">FATURAMENTO</span><strong id="faturamentoTotal">R$ 0,00</strong><small>volume filtrado</small><b class="metric-line"></b></article>
+  <article class="metric"><span class="metric-label">PEDIDOS ÚNICOS</span><strong id="quantidadeVendas">0</strong><small>id_venda distintos</small><div class="metric-icon">#</div></article>
+  <article class="metric"><span class="metric-label">UNIDADES</span><strong id="unidadesVendidas">0</strong><small>itens vendidos</small><div class="metric-icon">↗</div></article>
+  <article class="metric"><span class="metric-label">TICKET MÉDIO</span><strong id="ticketMedio">R$ 0,00</strong><small>por pedido</small><div class="metric-icon">★</div></article>
+  <article class="metric"><span class="metric-label">AVALIAÇÃO MÉDIA</span><strong id="avaliacaoMedia">—</strong><small>notas disponíveis</small><div class="metric-icon">✦</div></article>
+</section>
+
+<section class="insight-strip"><div><span class="signal"></span> LEITURA ATIVA</div><p id="insightText">Carregando sinais da operação...</p><button id="modoLeitura" type="button">alternar leitura</button></section>
+
+<section class="dashboard-grid">
+  <article class="card chart-main"><div class="card-head"><div><span class="card-index">02 / TEMPO</span><h3>Faturamento por mês</h3></div><span class="chart-tag">EVOLUÇÃO</span></div><div class="chart-box large"><canvas id="graficoMensal"></canvas></div></article>
+  <article class="card"><div class="card-head"><div><span class="card-index">03 / MIX</span><h3>Receita por categoria</h3></div><span class="chart-tag">R$</span></div><div class="chart-box"><canvas id="graficoCategoria"></canvas></div></article>
+  <article class="card"><div class="card-head"><div><span class="card-index">04 / PRODUTO</span><h3>Top produtos</h3></div><span class="chart-tag">R$</span></div><div class="chart-box"><canvas id="graficoProduto"></canvas></div></article>
+  <article class="card"><div class="card-head"><div><span class="card-index">05 / CANAL</span><h3>Onde acontece</h3></div><span class="chart-tag">PEDIDOS</span></div><div class="chart-box donut-box"><canvas id="graficoCanal"></canvas></div></article>
+  <article class="card"><div class="card-head"><div><span class="card-index">06 / PAGAMENTO</span><h3>Meios de pagamento</h3></div><span class="chart-tag">RECEITA</span></div><div class="chart-box"><canvas id="graficoPagamento"></canvas></div></article>
+  <article class="card"><div class="card-head"><div><span class="card-index">07 / OPERAÇÃO</span><h3>Ritmo por dia</h3></div><span class="chart-tag">PEDIDOS</span></div><div class="chart-box"><canvas id="graficoDia"></canvas></div></article>
+</section>
+
+<section class="card table-card">
+  <div class="table-head"><div><span class="card-index">08 / DADOS BRUTOS</span><h3>Explorador de vendas</h3><p id="recordCount">0 registros</p></div><label class="search"><span>⌕</span><input id="pesquisaTabela" type="search" placeholder="buscar produto, canal, pagamento..." aria-label="Pesquisar"></label></div>
+  <div id="emptyState" class="empty" hidden><strong>SEM SINAIS PARA EXIBIR</strong><p>Ajuste os controles ou limpe a busca.</p></div>
+  <div class="table-scroll"><table id="tabelaVendas"><thead><tr><th><button data-sort="id_venda">ID ↕</button></th><th><button data-sort="data">DATA ↕</button></th><th><button data-sort="produto">PRODUTO ↕</button></th><th><button data-sort="categoria">CATEGORIA ↕</button></th><th><button data-sort="canal">CANAL ↕</button></th><th><button data-sort="periodo">PERÍODO ↕</button></th><th class="numeric"><button data-sort="quantidade">QTD ↕</button></th><th class="numeric"><button data-sort="faturamento">FATURAMENTO ↕</button></th></tr></thead><tbody id="tabelaCorpo"></tbody></table></div>
+</section>
+<section class="social-card" aria-label="Redes sociais e contato">
+  <div class="social-intro"><span class="card-index">09 / CONTATO</span><h3>Caio Bortoleto Consultoria</h3><p>Análise de dados, dashboards e soluções digitais.</p></div>
+  <div class="social-links">
+    <a href="https://github.com/CaioBortoleto" target="_blank" rel="noopener noreferrer"><span class="social-icon">GH</span><span><small>GitHub</small><strong>CaioBortoleto</strong></span><b>↗</b></a>
+    <a href="https://linkedin.com/in/caio-bortoleto-403395263" target="_blank" rel="noopener noreferrer"><span class="social-icon">in</span><span><small>LinkedIn</small><strong>Caio Bortoleto</strong></span><b>↗</b></a>
+    <a href="mailto:caiobortoleto7@gmail.com"><span class="social-icon">@</span><span><small>E-mail</small><strong>caiobortoleto7@gmail.com</strong></span><b>↗</b></a>
+  </div>
+</section>
+<footer><span>NEXUS / dashboard didático</span><span id="footerInfo">1.367 registros carregados</span><span>Chart.js + Papa Parse / CDN</span></footer>
+</main><script src="script.js"></script>
+</body></html>
+
+
